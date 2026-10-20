@@ -1,1 +1,8 @@
-cache/
+doc/
+installer/
+mpv/
+portable_config/cache/
+
+*.com
+*.bat
+*.exe
