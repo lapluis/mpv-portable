@@ -20,7 +20,9 @@ git clone https://github.com/lapluis/mpv-portable.git mpv
 
 ## Update
 
-Close mpv before updating. Run the following commands from the `mpv` directory:
+Close mpv, then double-click `update-mpv.bat` in the `mpv` directory to download and install the latest matching mpv build. When the update finishes, press any key to close the window.
+
+To update the repository and mpv together, run these commands from the `mpv` directory:
 
 ```powershell
 git pull
