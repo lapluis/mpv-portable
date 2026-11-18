@@ -6,3 +6,5 @@ portable_config/cache/
 *.com
 *.bat
 *.exe
+
+/.mpv-version.json

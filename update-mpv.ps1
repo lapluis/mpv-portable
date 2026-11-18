@@ -26,6 +26,22 @@ try {
         throw "Expected exactly one mpv-x86_64-v3 archive in release $($release.tag_name); found $($assets.Count)."
     }
     $asset = $assets[0]
+    $versionFile = Join-Path $targetDir '.mpv-version.json'
+    $version = [ordered]@{
+        tag = $release.tag_name
+        assetId = $asset.id
+        assetName = $asset.name
+        assetUpdatedAt = $asset.updated_at
+        assetSize = $asset.size
+        assetDigest = $asset.digest
+    } | ConvertTo-Json -Compress
+
+    if ((Test-Path -LiteralPath $versionFile -PathType Leaf) -and
+        (Test-Path -LiteralPath (Join-Path $targetDir 'mpv.exe') -PathType Leaf) -and
+        (([string](Get-Content -LiteralPath $versionFile -Raw)).Trim() -ceq $version)) {
+        Write-Host "mpv is already up to date: $($release.tag_name)" -ForegroundColor Green
+        return
+    }
 
     # All downloads and extraction happen in a unique temporary directory first.
     $tempRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
@@ -77,9 +93,14 @@ try {
 
     # Do not remove unrelated files (for example, portable_config).
     Write-Host "Updating files in $targetDir ..."
+    # Invalidate the previous record before copying so a partial update can be retried.
+    if (Test-Path -LiteralPath $versionFile -PathType Leaf) {
+        Remove-Item -LiteralPath $versionFile -Force
+    }
     Get-ChildItem -LiteralPath $sourceDir -Force | ForEach-Object {
         Copy-Item -LiteralPath $_.FullName -Destination $targetDir -Recurse -Force
     }
+    Set-Content -LiteralPath $versionFile -Value $version -Encoding UTF8
     Write-Host "mpv updated successfully: $($release.tag_name)" -ForegroundColor Green
 }
 catch {
